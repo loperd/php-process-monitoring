@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding="UTF-8"?>
+<config>
+    <loggers>
+        <logger>
+            <id>emailLog</id>
+            <class>Renaay\Loggers\EmailServiceLogger</class>
+        </logger>
+    </loggers>
+    <services>
+        <service>
+            <class>Renaay\Services\HTTPServiceCheck</class>
+            <params>
+                <description>Omni HTTP Check</description>
+                <url>https://omniti.com/</url>
+                <timeout>30</timeout>
+                <frequency>900</frequency>
+            </params>
+            <loggers>
+                <logger>emailLog</logger>
+            </loggers>
+        </service>
+    </services>
+</config>

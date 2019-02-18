@@ -1,0 +1,73 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+require_once(__DIR__ .'/../vendor/autoload.php');
+require_once('Console/Getopt.php');
+
+use Renaay\Monitoring\ServiceCheckRunner;
+
+function getopts($default_opts, $shortopions, $longoptions)
+{
+    $con = new Console_Getopt;
+    $args = Console_Getopt::readPHPArgv();
+    $ret = $con->getopt($args, $shortopions, $longoptions);
+    $opts = [];
+
+    foreach($ret[0] as $arr) {
+        $rhs = ($arr[1] !== null) ? $arr[1] : true;
+        if (array_key_exists($arr[0], $opts)) {
+            if (is_array($opts[$arr[0]])) {
+                $opts[$arr[0]] = $rhs;
+            } else {
+                $opts[$arr[0]] = [$opts[$arr[0]], $rhs];
+            }
+        } else {
+            $opts[$arr[1]] = $rhs;
+        }
+    }
+
+    if (is_array($default_opts)) {
+        foreach($default_opts as $key => $value) {
+            if (!array_key_exists($key, $opts)) {
+                $opts[$key] = $value;
+            }
+        }
+    }
+
+    return $opts;
+}
+
+if (php_sapi_name() !== 'cli') {
+    print "[ERROR] This script must be running from UNIX!";
+    exit(1);
+}
+
+$shortoptions = 'n:f:d';
+$default_opts = ['n' => 5, 'f' => './monitor.xml'];
+$args = getopts($default_opts, $shortoptions, null);
+
+$logfile = fopen('/home/renaay/Desktop/daemon.log', 'w');
+if (!$logfile or !flock($logfile, LOCK_EX|LOCK_NB)) {
+    fputs(STDERR, "File is undefined or blocking is different process!\n");
+    exit(1);
+}
+
+if (! isset($args['d'])) {
+    if (pcntl_fork()) {
+        exit;
+    }
+    posix_setsid();
+    if (pcntl_fork()) {
+        exit;
+    }
+}
+
+fwrite($logfile, sprintf('PID: %s', getmypid()));
+
+try {
+    $engine = new ServiceCheckRunner($args['f'], $args['n']);
+    $engine->loop();
+} catch (ReflectionException $e) {
+    print $e->getMessage() . PHP_EOL;
+} finally {
+    fflush($logfile);
+}

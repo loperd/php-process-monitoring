@@ -1,0 +1,26 @@
+{
+    "name": "renaay/process-test",
+    "description": "Just a project for test",
+    "type": "project",
+    "license": "ISC",
+    "authors": [
+        {
+            "name": "Renaay",
+            "email": "renaay01@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Renaay\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require": {
+
+    }
+}
