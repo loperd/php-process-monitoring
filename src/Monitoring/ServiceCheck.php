@@ -61,6 +61,7 @@ abstract class ServiceCheck
         } else {
             $this->consecutive_failures = 0;
         }
+        
         $this->status_time = time();
         $this->current_status = $status;
         $this->logServiceEvent();
